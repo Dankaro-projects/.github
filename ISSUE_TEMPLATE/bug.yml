@@ -1,0 +1,24 @@
+name: Bug
+description: Something does not work as it should.
+type: Bug
+body:
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: What you saw, with the page or screen and the time if known.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it again
+      description: Optional. Screenshots are welcome.
+    validations:
+      required: false

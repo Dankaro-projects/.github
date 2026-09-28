@@ -1,0 +1,25 @@
+name: Task
+description: A piece of work with a clear result.
+type: Task
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be true when this is finished, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: The result someone can see or measure.
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: How it is checked
+      description: The test, page or number that shows it works.
+    validations:
+      required: false
