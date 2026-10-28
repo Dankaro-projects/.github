@@ -1,0 +1,15 @@
+# Fails a push or pull request when a migration creates a table or view in
+# public without Data API grants. Shared check: Dankaro-projects/.github.
+name: Supabase grants
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  grants:
+    uses: ./.github/workflows/supabase-grants.yml
