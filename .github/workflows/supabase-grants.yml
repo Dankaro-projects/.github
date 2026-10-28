@@ -1,0 +1,30 @@
+# Reusable check: every migration that creates a table or view in public
+# must grant Data API access in the same file (Supabase change of
+# 30 October 2026, Dankaro-projects/claude-team#21).
+# Each Supabase repository calls it from .github/workflows/supabase-grants.yml.
+name: Supabase grants
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  grants:
+    name: Supabase grants
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: Dankaro-projects/.github
+          path: .dankaro-github
+          sparse-checkout: .github/scripts
+      - name: Check migrations added or changed
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 .dankaro-github/.github/scripts/supabase_grants_guard.py ci "$BASE" "$HEAD"
