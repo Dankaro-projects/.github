@@ -10,9 +10,11 @@ migrations recreates it without access. See Dankaro-projects/claude-team#21.
 The same file runs in three places. Keep the copy in Dankaro-projects/.github
 (.github/scripts/supabase_grants_guard.py) identical to this one.
 
-  hook            Claude Code PreToolUse hook (Write, Edit, MultiEdit, Bash).
+  hook            Claude Code PreToolUse hook (Write, Edit, MultiEdit, Bash and
+                  the Supabase MCP tools apply_migration and execute_sql).
                   Write and Edit of a migration are checked on the resulting
-                  text; a git commit is checked on the staged migrations.
+                  text; a git commit is checked on the staged migrations; SQL
+                  sent through the Supabase MCP is checked as it is.
                   A failing check is denied with the reason.
   commit [dir]    Check the staged migrations of the repository in dir.
   ci BASE HEAD    Check the migrations added or changed between two commits
@@ -43,6 +45,7 @@ CREATE_VIEW = re.compile(
     re.I)
 GRANT = re.compile(r'\bgrant\s+(.*?)\bon\s+(.*?)\bto\s+([^;]*)', re.I | re.S)
 DEFAULT_PRIVS = re.compile(r'\balter\s+default\s+privileges\b[^;]*\bgrant\b[^;]*\bon\s+tables\b', re.I | re.S)
+MCP_SQL = re.compile(r'^mcp__.*supabase.*__(apply_migration|execute_sql)$', re.I)
 NO_API = re.compile(r'--\s*grants-check:\s*no-api\s+(%s)(?:\s*\.\s*(%s))?\s+\S' % (IDENT, IDENT), re.I)
 
 
@@ -184,6 +187,10 @@ def hook():
         if not re.search(r'\bgit\b[^|;&]*\bcommit\b', command):
             return 0
         failures = check_staged(commit_dir(command, cwd))
+    elif MCP_SQL.match(tool):
+        problems = check_sql(inp.get('query', ''))
+        if problems:
+            failures.append(report('%s (%s)' % (tool.rsplit('__', 1)[-1], inp.get('name') or 'sql'), problems))
     if not failures:
         return 0
     print(json.dumps({'hookSpecificOutput': {
