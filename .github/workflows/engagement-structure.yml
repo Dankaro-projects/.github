@@ -1,0 +1,29 @@
+# Reusable check: every file of an engagement repository is in its place and
+# every Deliverable is staffed (Dankaro-projects/claude-team#29).
+# The source is scripts/engagement_check.py in claude-team; the copy here must stay identical.
+name: Engagement structure
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  structure:
+    name: Engagement structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Dankaro-projects/.github
+          path: .dankaro-github
+          sparse-checkout: .github/scripts
+      - name: Every file is in its place and every Deliverable is staffed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mv .dankaro-github "$RUNNER_TEMP/dankaro-github"
+          python3 "$RUNNER_TEMP/dankaro-github/.github/scripts/engagement_check.py" --issues
